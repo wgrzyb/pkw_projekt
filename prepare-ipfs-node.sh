@@ -6,6 +6,6 @@ docker run -d --name ipfs-node -v /tmp/ipfs-docker-staging:/export -v /tmp/ipfs-
 docker exec -it ipfs-node sh << EOF
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://${ipfs_node_address}:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
-ipfs shutdown
 EOF
+docker stop ipfs-node
 docker start ipfs-node
