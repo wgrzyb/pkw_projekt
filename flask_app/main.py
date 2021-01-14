@@ -9,6 +9,7 @@ from werkzeug.utils import redirect, secure_filename
 from algosdk.v2client import algod
 
 from flask_app.config import Config
+from flask_app.utils import encrypt, decrypt
 
 app = Flask(__name__, static_url_path=Config.flask_static_url_path)
 app.config.from_object('config.BaseConfig')
@@ -22,6 +23,10 @@ def home():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.allowed_extensions
+
+
+def allowed_enc_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.allowed_enc_extensions
 
 
 # Function from Algorand Inc.
@@ -150,6 +155,7 @@ def get_file():
 @app.route('/pastebin', methods=['GET', 'POST'])
 def pastebin():
     if request.method == 'POST':
+        # Brak parametru text
         if 'text' not in request.form:
             flash('Brak parametru text', 'alert alert-danger')
             return redirect(request.url)
@@ -158,15 +164,71 @@ def pastebin():
         if text == '':
             flash('Nie podano text-u!', 'alert alert-warning')
             return redirect(request.url)
+        # Brak parametru password:
+        if 'password' not in request.form:
+            flash('Brak parametru password', 'alert alert-danger')
+            return redirect(request.url)
+        password = request.form.get('password')
+        # Nie podano hasła:
+        if password == '':
+            flash('Nie podano hasła!', 'alert alert-warning')
+            return redirect(request.url)
         # Przesłanie text-u:
-        if text:
+        if text and password:
             unique_filename = str(uuid.uuid4()) + '.md'  # utworzenie unikalnej nazwy pliku dla utworzonego text-u
-            files = {'file': (unique_filename, text.encode('utf-8'), 'text/plain')}
+            encrypted_text = encrypt(password.encode('utf-8'), text.encode('utf-8'))
+            print(encrypted_text)
+            files = {'file': (unique_filename, encrypted_text, 'text/plain')}
             cid = share_file(files)
             # Flash potwierdzenia przesłania text-u
             flash(f"Text został przesłany! CID: {cid}", 'alert alert-success')
             return redirect(request.url)
     return render_template('pastebin.html', title='Pastebin')
+
+
+@app.route('/decrypt', methods=['GET', 'POST'])
+def decrypt_file():
+    if request.method == 'POST':
+        # Brak parametru file:
+        if 'file' not in request.files:
+            flash('Brak parametru file', 'alert alert-danger')
+            return redirect(request.url)
+        file = request.files['file']
+        # Nie wybrano pliku:
+        if file.filename == '':
+            flash('Nie wybrano pliku!', 'alert alert-warning')
+            return redirect(request.url)
+        # Wybrano plik o nieprawidłowym rozszerzeniu:
+        if not allowed_enc_file(file.filename):
+            flash('Wybrano plik o nieprawidłowym rozszerzeniu!', 'alert alert-warning')
+            return redirect(request.url)
+        # Brak parametru password:
+        if 'password' not in request.form:
+            flash('Brak parametru password', 'alert alert-danger')
+            return redirect(request.url)
+        password = request.form.get('password')
+        # Nie podano hasła:
+        if password == '':
+            flash('Nie podano hasła!', 'alert alert-warning')
+            return redirect(request.url)
+        # Odszyfrowanie pliku:
+        if file and password:
+            filename = secure_filename(file.filename)
+            file_content = file.read().decode('utf-8')
+            try:
+                decrypted_content = decrypt(password.encode('utf-8'), file_content)
+            except ValueError:
+                flash('Nieprawidłowe hasło!', 'alert alert-danger')
+                return redirect(request.url)
+            if '.' in filename:
+                new_filename = filename.rsplit('.', 1)[0] + '-decrypted.' + filename.rsplit('.', 1)[1].lower()
+            else:
+                new_filename = filename + '-decrypted'
+            # Flash potwierdzenia odszyfrowania pliku
+            download_file(decrypted_content, os.path.join(app.config['UPLOAD_FOLDER'], new_filename))
+            flash(f"Plik {filename} został odszyfrowany!", 'alert alert-success')
+            return redirect(request.url)
+    return render_template('decrypt.html', title='Odszyfrowanie pliku')
 
 
 if __name__ == '__main__':

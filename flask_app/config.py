@@ -6,6 +6,7 @@ class Config:
     algod_mnemonic = "chimney carry tape zone pen margin sibling measure make language super then collect race vast " \
                      "pond basket liar library theory fault tunnel follow absent evidence "
     allowed_extensions = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'md'}
+    allowed_enc_extensions = {'md'}
     flask_port = 5000
     flask_static_url_path = '/flask_app'
     ipfs_api_address = 'http://127.0.0.1:5001'
