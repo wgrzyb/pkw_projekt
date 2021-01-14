@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 
 import requests
 from algosdk import transaction
@@ -36,6 +37,44 @@ def wait_for_confirmation(client, tx_id):
     return tx_info
 
 
+def share_file(files):
+    # Dodawanie pliku do ipfs-a
+    print("Dodawanie pliku do IPFS-a.")
+    url = f"{Config.ipfs_api_address}/api/v0/add"
+    params = (('wrap-with-directory', True),)
+    response = requests.post(url, files=files, params=params)
+    if response.status_code != 200:
+        print(response.text)
+        raise Exception(f"Invalid status code: '{response.status_code}'.")
+    result = response.text.splitlines()
+    cid = json.loads(result[1]).get('Hash')
+    print("Plik dodano do IPFS-a.")
+    # Dodawanie informacji do blockchain-a Algorand
+    print("Dodawanie informacji do blockchain-a Algorand.")
+    algod_token = Config.algod_token
+    algod_address = Config.algod_api_address
+    purestake_token = {'X-Api-key': algod_token}
+    algod_client = algod.AlgodClient(algod_token, algod_address, headers=purestake_token)
+    # ustawienie parametrów transakcji
+    params = algod_client.suggested_params()
+    gh = params.gh
+    first_valid_round = params.first
+    last_valid_round = params.last
+    fee = params.min_fee
+    send_amount = 0
+    note = f"{{'cid': {cid}}}".encode()
+    sender = Config.algod_public_key
+    receiver = Config.algod_public_key
+    # utworzenie i zatwierdzenie transakcji
+    tx = transaction.PaymentTxn(sender, fee, first_valid_round, last_valid_round, gh, receiver, send_amount,
+                                note=note, flat_fee=True)
+    signed_tx = tx.sign(Config.algod_private_key)
+    tx_id = algod_client.send_transaction(signed_tx)  # wysłanie transakcji
+    print(f"Poprawnie zlecono transakcję o ID {tx_id}")
+    wait_for_confirmation(algod_client, tx_id=signed_tx.transaction.get_txid())  # oczekiwanie na potwierdzenie
+    return cid
+
+
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -54,38 +93,8 @@ def upload_file():
             return redirect(request.url)
         # Przesłanie pliku:
         if file:
-            # Dodawanie przesłanego pliku do ipfs-a
-            url = f"{Config.ipfs_api_address}/api/v0/add"
             files = {'file': (secure_filename(file.filename), file.read(), file.content_type)}
-            params = (('wrap-with-directory', True),)
-            response = requests.post(url, files=files, params=params)
-            if response.status_code != 200:
-                print(response.text)
-                raise Exception(f"Invalid status code: '{response.status_code}'.")
-            result = response.text.splitlines()
-            cid = json.loads(result[1]).get('Hash')
-            # Dodawanie informacji do blockchain-a Algorand
-            algod_token = Config.algod_token
-            algod_address = Config.algod_api_address
-            purestake_token = {'X-Api-key': algod_token}
-            algod_client = algod.AlgodClient(algod_token, algod_address, headers=purestake_token)
-            # ustawienie parametrów transakcji
-            params = algod_client.suggested_params()
-            gh = params.gh
-            first_valid_round = params.first
-            last_valid_round = params.last
-            fee = params.min_fee
-            send_amount = 0
-            note = f"{{'cid': {cid}}}".encode()
-            sender = Config.algod_public_key
-            receiver = Config.algod_public_key
-            # utworzenie i zatwierdzenie transakcji
-            tx = transaction.PaymentTxn(sender, fee, first_valid_round, last_valid_round, gh, receiver, send_amount,
-                                        note=note, flat_fee=True)
-            signed_tx = tx.sign(Config.algod_private_key)
-            tx_id = algod_client.send_transaction(signed_tx)  # wysłanie transakcji
-            print(f"Poprawnie zlecono transakcję o ID {tx_id}")
-            wait_for_confirmation(algod_client, tx_id=signed_tx.transaction.get_txid())  # oczekiwanie na potwierdzenie
+            cid = share_file(files)
             # Flash potwierdzenia przesłania pliku
             flash(f"Plik został przesłany! CID: {cid}", 'alert alert-success')
             return redirect(request.url)
@@ -136,6 +145,28 @@ def get_file():
         flash(f"Plik {filename} został pobrany!", 'alert alert-success')
         return redirect(request.url)
     return render_template('get_file.html', title='Pobieranie pliku')
+
+
+@app.route('/pastebin', methods=['GET', 'POST'])
+def pastebin():
+    if request.method == 'POST':
+        if 'text' not in request.form:
+            flash('Brak parametru text', 'alert alert-danger')
+            return redirect(request.url)
+        text = request.form.get('text')
+        # Nie podano text-u:
+        if text == '':
+            flash('Nie podano text-u!', 'alert alert-warning')
+            return redirect(request.url)
+        # Przesłanie text-u:
+        if text:
+            unique_filename = str(uuid.uuid4()) + '.md'  # utworzenie unikalnej nazwy pliku dla utworzonego text-u
+            files = {'file': (unique_filename, text.encode('utf-8'), 'text/plain')}
+            cid = share_file(files)
+            # Flash potwierdzenia przesłania text-u
+            flash(f"Text został przesłany! CID: {cid}", 'alert alert-success')
+            return redirect(request.url)
+    return render_template('pastebin.html', title='Pastebin')
 
 
 if __name__ == '__main__':

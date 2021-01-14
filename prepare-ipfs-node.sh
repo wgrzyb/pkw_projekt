@@ -9,3 +9,7 @@ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]
 EOF
 docker stop ipfs-node
 docker start ipfs-node
+
+#Alternatywnie:
+docker run -d --name ipfs-node -p 8080:8080 -p 4001:4001 -p 5001:5001 ipfs/go-ipfs:latest
+http://127.0.0.1:5001/webui  #webui

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section" style="text-align: center; width: 1000px; margin: 0 auto;">
+        <div class="article-metadata"><a class="mr-2">Projekt z Podstaw Kryptologii Współczesnej</a></div>
+        <h2><a class="article-title">PASTEBIN</a></h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method=post>
+            <input type="button" class="btn btn-secondary" value="Nowy" onclick="javascript:eraseText();">
+            <button class="btn btn-primary" id="save">Opublikuj</button>
+            <textarea id="editor" name="text"></textarea>
+        </form>
+    </div>
+
+    <link rel="stylesheet" href="http://lab.lepture.com/editor/editor.css" />
+    <script type="text/javascript" src="http://lab.lepture.com/editor/editor.js"></script>
+    <script type="text/javascript" src="http://lab.lepture.com/editor/marked.js"></script>
+    <script>
+        var editor = new Editor(document.getElementById("editor"));
+        editor.render();
+
+        function eraseText() {
+            document.getElementById("editor").value=editor.codemirror.getValue();
+            editor.codemirror.setValue("");
+        }
+    </script>
+{% endblock %}

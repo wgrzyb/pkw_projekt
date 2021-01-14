@@ -5,10 +5,11 @@ class Config:
     algod_private_key = 'QLmIu/0/0R/2+Ik0PF+zA86WwTbep5kwIAIF/imqV6tT/u+caPHSyzFjJp5u3Rg9ajascwkzxzd/MyfZMK+mHQ=='
     algod_mnemonic = "chimney carry tape zone pen margin sibling measure make language super then collect race vast " \
                      "pond basket liar library theory fault tunnel follow absent evidence "
-    allowed_extensions = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+    allowed_extensions = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'md'}
     flask_port = 5000
     flask_static_url_path = '/flask_app'
-    ipfs_api_address = 'http://192.168.137.62:5001'
+    ipfs_api_address = 'http://127.0.0.1:5001'
+    # ipfs_api_address = 'http://192.168.137.62:5001'
 
 
 class BaseConfig(object):
