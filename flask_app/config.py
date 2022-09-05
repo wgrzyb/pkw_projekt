@@ -1,16 +1,18 @@
 class Config:
+    # Algorand configuration - it's only testnet so you can use this if you want
     algod_api_address = 'https://testnet-algorand.api.purestake.io/ps2'
     algod_token = 'lGcdUfEiuN8JIetcoO3q87xfn9PZuP8p6057Qcgf'
     algod_public_key = 'KP7O7HDI6HJMWMLDE2PG5XIYHVVDNLDTBEZ4ON37GMT5SMFPUYO7HOHX7Q'
     algod_private_key = 'QLmIu/0/0R/2+Ik0PF+zA86WwTbep5kwIAIF/imqV6tT/u+caPHSyzFjJp5u3Rg9ajascwkzxzd/MyfZMK+mHQ=='
     algod_mnemonic = "chimney carry tape zone pen margin sibling measure make language super then collect race vast " \
                      "pond basket liar library theory fault tunnel follow absent evidence "
+    # App configuration
     allowed_extensions = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'md'}
     allowed_enc_extensions = {'md'}
     flask_port = 5000
     flask_static_url_path = '/flask_app'
+    # IPFS configuration
     ipfs_api_address = 'http://127.0.0.1:5001'
-    # ipfs_api_address = 'http://192.168.137.62:5001'
 
 
 class BaseConfig(object):
