@@ -1,36 +1,39 @@
-# pkw_projekt
-The project was carried out as part of the "Fundamentals of modern cryptology" laboratory classes at the Military University of Technology.
+# pkw projekt
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](https://github.com/wgrzyb/pkw_projekt/blob/master/README.en.md)
 
-The project concerns solving the problem of durable medium using Algorand blockhcain and InterPlanetary File System (IPFS) technologies. To demonstrate the solution, Python web applications were implemented using the Flask framework.
+Projekt został zrealizowany w ramach zajęć laboratoryjnych „Podstawy kryptologii współczesnej” na Wojskowej Akademii Technicznej.
 
-## Application details
+Projekt dotyczy rozwiązania problemu trwałego nośnika z wykorzystaniem łańcucha bloków Algorand oraz technologii InterPlanetary File System (IPFS).
+Aby zademonstrować rozwiązanie, zaimplementowano aplikację internetową w języku Python z wykorzystaniem frameworka Flask.
 
-The application allows you to transfer files and publish messages (pastebin) encrypted with a password.
-Uploaded files are placed and stored in IPFS.
-To preserve the information that the file was sent to IPFS, the obtained CID of the file is added to the Algorand blockchain testnet.
-The application also allows you to download uploaded files and published messages.
+## Szczegóły aplikacji
 
-## Preparation of the environment
+Aplikacja umożliwia przesyłanie plików i publikowanie wiadomości (pastebin) zaszyfrowanych hasłem.
+Przesłane pliki są umieszczane i przechowywane w IPFS.
+Aby zachować informację, że plik został wysłany do IPFS, uzyskany identyfikator CID pliku jest dodawany do sieci testowej łańcucha bloków Algorand.
+Aplikacja umożliwia również pobieranie wgranych plików i opublikowanych wiadomości.
 
-  1. Clone the repository:
+## Przygotowanie środowiska
+
+  1. Zklonuj repozytorium:
 
   ```
   git clone git@github.com:wgrzyb/pkw_projekt.git
   ```
 
-  2. Navigate to the repository folder and install the required libraries (from the `requirements.txt` file):
+  2. Przejdź do folderu repozytorium i zainstaluj wymagane biblioteki (z pliku `requirements.txt`):
   
   ```
   cd .\pkw_projekt
   pip install -r .\requirements.txt
   ```
   
-  3. Run Go-IPFS on the docker:
+  3. Uruchom Go-IPFS na dockerze:
   
   ```
   docker run -d --name ipfs-node -p 8080:8080 -p 4001:4001 -p 5001:5001 ipfs/go-ipfs:latest
   ```
   
-  4. Run [flask application](https://github.com/wgrzyb/pkw_projekt/blob/master/flask_app/main.py) from the repository directory.
+  4. Uruchom [aplikację flask](https://github.com/wgrzyb/pkw_projekt/blob/master/flask_app/main.py) z katalogu repozytorium.
   
-  5. Open [web application](http://127.0.0.1:5000/).
+  5. Otwórz [aplikację web](http://127.0.0.1:5000/).
