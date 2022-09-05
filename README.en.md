@@ -1,4 +1,4 @@
-# pkw_projekt
+# pkw project
 [![pl](https://img.shields.io/badge/lang-pl-blue.svg)](https://github.com/wgrzyb/pkw_projekt/blob/master/README.md)
 
 The project was carried out as part of the "Fundamentals of modern cryptology" laboratory classes at the Military University of Technology.
